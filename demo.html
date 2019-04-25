@@ -3,18 +3,18 @@
 <head>
   <title>Hand Tracking</title>
 
-  <script type="text/javascript" src="libs/polyfill.js"></script> 
-  <script type="text/javascript" src="cv.js"></script> 
-  <script type="text/javascript" src="handtracking.js"></script> 
+  <script type="text/javascript" src="libs/polyfill.js"></script>
+  <script type="text/javascript" src="cv.js"></script>
+  <script type="text/javascript" src="handtracking.js"></script>
 
   <script>
-  
+
     var DEMO = function(){
     };
-    
+
     DEMO.prototype.start = function() {
       var that = this;
-    
+
       this.tracker = new HT.Tracker();
 
       this.cbxHull = document.getElementById("cbxHull");
@@ -27,18 +27,18 @@
 
       this.canvas.width = parseInt(this.canvas.style.width);
       this.canvas.height = parseInt(this.canvas.style.height);
-      
+
       this.image = this.context.createImageData(
         this.canvas.width * 0.2, this.canvas.height * 0.2);
 
       if (navigator.mediaDevices === undefined) {
         navigator.mediaDevices = {};
       }
-      
+
       if (navigator.mediaDevices.getUserMedia === undefined) {
         navigator.mediaDevices.getUserMedia = function(constraints) {
           var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-          
+
           if (!getUserMedia) {
             return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
           }
@@ -47,9 +47,9 @@
           });
         }
       }
-      
+
       navigator.mediaDevices
-        .getUserMedia({ video: true })
+        .getUserMedia({ video: false })
         .then(function(stream) {
           if ("srcObject" in video) {
             video.srcObject = stream;
@@ -67,47 +67,47 @@
 
     DEMO.prototype.tick = function(){
       var that = this, image, candidate;
-    
+
       requestAnimationFrame( function() { return that.tick(); } );
-      
+
       if (this.video.readyState === this.video.HAVE_ENOUGH_DATA){
         image = this.snapshot();
-        
+
         candidate = this.tracker.detect(image);
-        
+
         this.draw(candidate);
       }
     };
-    
+
     DEMO.prototype.snapshot = function(){
       this.context.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
-        
+
       return this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
     };
 
     DEMO.prototype.draw = function(candidate){
       if (candidate){
-      
+
         if (this.cbxHull.checked){
           this.drawHull(candidate.hull, "red");
         }
-        
+
         if (this.cbxDefects.checked){
           this.drawDefects(candidate.defects, "blue");
         }
       }
-      
+
       if (this.cbxSkin.checked){
         this.context.putImageData(
-          this.createImage(this.tracker.mask, this.image), 
+          this.createImage(this.tracker.mask, this.image),
           this.canvas.width - this.image.width,
           this.canvas.height - this.image.height);
       }
     };
-    
+
     DEMO.prototype.drawHull = function(hull, color){
       var len = hull.length, i = 1;
-    
+
       if (len > 0){
         this.context.beginPath();
         this.context.lineWidth = 3;
@@ -122,10 +122,10 @@
         this.context.closePath();
       }
     };
-    
+
     DEMO.prototype.drawDefects = function(defects, color){
       var len = defects.length, i = 0, point;
-    
+
       if (len > 0){
         this.context.beginPath();
         this.context.lineWidth = 3;
@@ -145,19 +145,19 @@
       var src = imageSrc.data, dst = imageDst.data,
           width = imageSrc.width, span = 4 * width,
           len = src.length, i = 0, j = 0, k = 0;
-      
+
       for(i = 0; i < len; i += span){
-      
+
         for(j = 0; j < width; j += 5){
-        
+
           dst[k] = dst[k + 1] = dst[k + 2] = src[i];
           dst[k + 3] = 255;
           k += 4;
-          
+
           i += 5;
         }
       }
-      
+
       return imageDst;
     };
 
@@ -165,7 +165,7 @@
       var demo = new DEMO();
       demo.start();
     };
-  
+
   </script>
 
 </head>
